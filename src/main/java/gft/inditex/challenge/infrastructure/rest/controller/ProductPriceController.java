@@ -2,6 +2,7 @@ package gft.inditex.challenge.infrastructure.rest.controller;
 
 import java.time.Instant;
 
+import gft.inditex.challenge.application.inbound.GetPriceUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Prices", description = "Operations related to product pricing")
 public class ProductPriceController {
 
+    private final GetPriceUseCase getPriceUseCase;
     private final PriceResponseMapper priceResponseMapper;
 
     @GetMapping("/brands/{brandId}/products/{productId}/prices")
@@ -94,8 +96,9 @@ public class ProductPriceController {
                     required = true,
                     example = "2020-06-14T10:00:00Z"
             )
-            @RequestParam Instant onDate) {
-
-        throw new UnsupportedOperationException("Not implemented yet");
+            @RequestParam Instant onDate
+    ) {
+        var priceResult = getPriceUseCase.getApplicablePrice(brandId, productId, onDate);
+        return ResponseEntity.ok(priceResponseMapper.toResponse(priceResult));
     }
 }

@@ -1,7 +1,8 @@
-package gft.inditex.challenge.infrastructure.db.jpa.adapter;
+package gft.inditex.challenge.integration.infrastructure.db.jpa.adapter;
 
 import gft.inditex.challenge.domain.exception.NotFoundException;
 import gft.inditex.challenge.domain.model.Price;
+import gft.inditex.challenge.infrastructure.db.jpa.adapter.PricePersistenceAdapter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

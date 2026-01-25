@@ -1,4 +1,4 @@
-package gft.inditex.challenge.application;
+package gft.inditex.challenge.unit.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;

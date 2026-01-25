@@ -1,4 +1,4 @@
-package gft.inditex.challenge.infrastructure.rest.controller;
+package gft.inditex.challenge.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

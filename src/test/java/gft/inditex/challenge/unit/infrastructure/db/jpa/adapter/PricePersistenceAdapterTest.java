@@ -1,7 +1,8 @@
-package gft.inditex.challenge.infrastructure.db.jpa.adapter;
+package gft.inditex.challenge.unit.infrastructure.db.jpa.adapter;
 
 import gft.inditex.challenge.domain.exception.NotFoundException;
 import gft.inditex.challenge.domain.model.Price;
+import gft.inditex.challenge.infrastructure.db.jpa.adapter.PricePersistenceAdapter;
 import gft.inditex.challenge.infrastructure.db.jpa.entity.PriceJpaEntity;
 import gft.inditex.challenge.infrastructure.db.jpa.mapper.PriceJpaMapper;
 import gft.inditex.challenge.infrastructure.db.jpa.repository.PriceJpaRepository;

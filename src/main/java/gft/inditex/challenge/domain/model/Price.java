@@ -21,5 +21,9 @@ public class Price {
 
     private Instant onDate;
 
+    private Instant startDate;
+
+    private Instant endDate;
+
     private BigDecimal finalPrice;
 }

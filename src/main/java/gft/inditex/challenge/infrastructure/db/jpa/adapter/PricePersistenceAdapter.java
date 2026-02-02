@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Adapter implementation that bridges the domain port with JPA persistence.
@@ -22,28 +23,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PricePersistenceAdapter implements PriceRepository {
 
-    private static final int FIRST_PAGE = 0;
-    private static final int SINGLE_RESULT = 1;
-    private static final int FIRST_RESULT = 0;
-    private static final String PRIORITY_FIELD = "priority";
-
     private final PriceJpaRepository priceJpaRepository;
     private final PriceJpaMapper priceJpaMapper;
 
     @Override
     public Price findApplicablePrice(Long brandId, Long productId, Instant onDate) {
 
-        List<PriceJpaEntity> results = priceJpaRepository.findAll(
-                PriceJpaSpecification.findApplicablePrice(brandId, productId, onDate),
-                PageRequest.of(FIRST_PAGE, SINGLE_RESULT, Sort.by(Sort.Direction.DESC, PRIORITY_FIELD))
-        ).getContent();
+        Optional<PriceJpaEntity> result = priceJpaRepository.findOne(
+                PriceJpaSpecification.findApplicablePrice(brandId, productId, onDate)
+        );
 
-        if (results.isEmpty()) {
-            throw new NotFoundException(
-                    String.format("No price found for brandId=%d, productId=%d on date %s",
-                            brandId, productId, onDate));
-        }
-
-        return priceJpaMapper.toDomain(results.get(FIRST_RESULT), onDate);
+        return result.map(priceJpaEntity -> priceJpaMapper.toDomain(priceJpaEntity, onDate)).orElse(null);
     }
 }

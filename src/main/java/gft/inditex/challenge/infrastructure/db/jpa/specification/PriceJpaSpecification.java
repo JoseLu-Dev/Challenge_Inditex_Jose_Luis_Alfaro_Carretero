@@ -3,6 +3,8 @@ package gft.inditex.challenge.infrastructure.db.jpa.specification;
 import gft.inditex.challenge.infrastructure.db.jpa.entity.PriceJpaEntity;
 import org.springframework.data.jpa.domain.Specification;
 
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import java.time.Instant;
 
 /**
@@ -14,6 +16,7 @@ public final class PriceJpaSpecification {
     private static final String PRODUCT_ID_FIELD = "productId";
     private static final String START_DATE_FIELD = "startDate";
     private static final String END_DATE_FIELD = "endDate";
+    private static final String PRIORITY_FIELD = "priority";
 
     private PriceJpaSpecification() {
     }
@@ -56,6 +59,33 @@ public final class PriceJpaSpecification {
     }
 
     /**
+     * Creates a specification to filter prices with maximum priority
+     * among all applicable prices for the given criteria.
+     * Uses a subquery to find the max priority value.
+     *
+     * @param brandId   the brand identifier
+     * @param productId the product identifier
+     * @param onDate    the date for which the price should be effective
+     * @return the specification
+     */
+    public static Specification<PriceJpaEntity> hasMaxPriority(
+            Long brandId, Long productId, Instant onDate) {
+        return (root, query, cb) -> {
+            Specification<PriceJpaEntity> filterSpec = hasBrandId(brandId)
+                    .and(hasProductId(productId))
+                    .and(isEffectiveOn(onDate));
+
+            Subquery<Integer> maxPrioritySubquery = query.subquery(Integer.class);
+            Root<PriceJpaEntity> subRoot = maxPrioritySubquery.from(PriceJpaEntity.class);
+
+            maxPrioritySubquery.select(cb.max(subRoot.get(PRIORITY_FIELD)));
+            maxPrioritySubquery.where(filterSpec.toPredicate(subRoot, query, cb));
+
+            return cb.equal(root.get(PRIORITY_FIELD), maxPrioritySubquery);
+        };
+    }
+
+    /**
      * Creates a combined specification to find an applicable price
      * for a given brand, product, and date.
      *
@@ -68,6 +98,7 @@ public final class PriceJpaSpecification {
             Long brandId, Long productId, Instant onDate) {
         return hasBrandId(brandId)
                 .and(hasProductId(productId))
-                .and(isEffectiveOn(onDate));
+                .and(isEffectiveOn(onDate))
+                .and(hasMaxPriority(brandId, productId, onDate));
     }
 }

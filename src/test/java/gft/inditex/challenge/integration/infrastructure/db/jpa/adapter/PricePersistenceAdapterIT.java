@@ -1,20 +1,22 @@
 package gft.inditex.challenge.integration.infrastructure.db.jpa.adapter;
 
-import gft.inditex.challenge.domain.exception.NotFoundException;
 import gft.inditex.challenge.domain.model.Price;
 import gft.inditex.challenge.infrastructure.db.jpa.adapter.PricePersistenceAdapter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
+@TestPropertySource(properties = {
+    "spring.datasource.url=jdbc:h2:mem:integration-test-db"
+})
 class PricePersistenceAdapterIT {
 
     private static final Long BRAND_ID_ZARA = 1L;
@@ -38,12 +40,13 @@ class PricePersistenceAdapterIT {
     }
 
     @Test
-    @DisplayName("Should throw NotFoundException when no price exists")
-    void shouldThrowNotFoundExceptionWhenNoPriceExists() {
-        Instant queryDate = Instant.parse("2019-01-01T10:00:00Z");
+    @DisplayName("Should return null when not found")
+    void shouldReturnNullWhenNotFound() {
+        Instant queryDate = Instant.parse("2026-06-14T10:00:00Z");
 
-        assertThatThrownBy(() -> pricePersistenceAdapter.findApplicablePrice(BRAND_ID_ZARA, PRODUCT_ID, queryDate))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("No price found");
+        Price result = pricePersistenceAdapter.findApplicablePrice(BRAND_ID_ZARA, PRODUCT_ID, queryDate);
+
+        assertThat(result).isNull();
     }
+
 }

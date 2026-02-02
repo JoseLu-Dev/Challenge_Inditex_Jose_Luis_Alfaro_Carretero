@@ -1,6 +1,5 @@
 package gft.inditex.challenge.unit.infrastructure.db.jpa.adapter;
 
-import gft.inditex.challenge.domain.exception.NotFoundException;
 import gft.inditex.challenge.domain.model.Price;
 import gft.inditex.challenge.infrastructure.db.jpa.adapter.PricePersistenceAdapter;
 import gft.inditex.challenge.infrastructure.db.jpa.entity.PriceJpaEntity;
@@ -12,17 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -52,8 +47,8 @@ class PricePersistenceAdapterTest {
         PriceJpaEntity entity = createPriceJpaEntity();
         Price expectedPrice = createPrice();
 
-        when(priceJpaRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(entity)));
+        when(priceJpaRepository.findOne(any(Specification.class)))
+                .thenReturn(Optional.of(entity));
         when(priceJpaMapper.toDomain(eq(entity), eq(ON_DATE)))
                 .thenReturn(expectedPrice);
 
@@ -64,22 +59,20 @@ class PricePersistenceAdapterTest {
         assertThat(result.getProductId()).isEqualTo(PRODUCT_ID);
         assertThat(result.getFinalPrice()).isEqualTo(PRICE);
 
-        verify(priceJpaRepository).findAll(any(Specification.class), any(Pageable.class));
+        verify(priceJpaRepository).findOne(any(Specification.class));
         verify(priceJpaMapper).toDomain(entity, ON_DATE);
     }
 
     @Test
-    @DisplayName("Should throw NotFoundException when no price is found")
-    void shouldThrowNotFoundExceptionWhenNoPriceFound() {
-        when(priceJpaRepository.findAll(any(Specification.class), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(Collections.emptyList()));
+    @DisplayName("Should return null when no price is found")
+    void shouldReturnNullWhenNoPriceFound() {
+        when(priceJpaRepository.findOne(any(Specification.class)))
+                .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> pricePersistenceAdapter.findApplicablePrice(BRAND_ID, PRODUCT_ID, ON_DATE))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("No price found")
-                .hasMessageContaining(BRAND_ID.toString())
-                .hasMessageContaining(PRODUCT_ID.toString())
-                .hasMessageContaining(ON_DATE.toString());
+        Price result = pricePersistenceAdapter.findApplicablePrice(BRAND_ID, PRODUCT_ID, ON_DATE);
+
+        assertThat(result).isNull();
+        verify(priceJpaRepository).findOne(any(Specification.class));
     }
 
     private PriceJpaEntity createPriceJpaEntity() {

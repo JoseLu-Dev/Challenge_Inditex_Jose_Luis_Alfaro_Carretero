@@ -2,7 +2,7 @@ package gft.inditex.challenge.application.service;
 
 import java.time.Instant;
 
-import gft.inditex.challenge.application.inbound.GetPriceUseCase;
+import gft.inditex.challenge.domain.inbound.GetPriceUseCase;
 import org.springframework.stereotype.Service;
 
 import gft.inditex.challenge.domain.model.Price;

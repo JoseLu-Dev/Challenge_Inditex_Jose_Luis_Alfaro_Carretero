@@ -1,4 +1,4 @@
-package gft.inditex.challenge.application.inbound;
+package gft.inditex.challenge.domain.inbound;
 
 import java.time.Instant;
 
